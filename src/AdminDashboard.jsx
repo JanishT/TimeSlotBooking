@@ -1,40 +1,38 @@
-import React from 'react';
+import React from 'react'
+import { useAppContext } from './context/AppContext';
+import { Navigate } from 'react-router-dom';
 
-const AdminDashboard = ({ bookedSlots, onSlotStatusUpdate }) => {
-  const updateSlotStatus = (bookingId, newStatus) => {
-    // Update the status of a booked slot
-    const updatedBookedSlots = bookedSlots.map((booking) =>
-      booking.id === bookingId ? { ...booking, status: newStatus } : booking
-    );
-    // Pass the updated booked slots back to the parent component
-    onSlotStatusUpdate(updatedBookedSlots);
-  };
+const AdminDashboard = () => {
+  const { setPaymentDetails,paymentDetails } = useAppContext();
+  console.log('Payment details received:', paymentDetails);
 
+  const currentUser = localStorage.getItem('current');
+  const isAdmin = currentUser === 'admin@gmail.com';
+
+  // Retrieve payment details from local storage on component mount
+  React.useEffect(() => {
+    const storedPaymentDetails = JSON.parse(localStorage.getItem('paymentDetails')) || [];
+    setPaymentDetails(storedPaymentDetails);
+  }, [setPaymentDetails]);
+
+  if (!isAdmin) {
+    return <Navigate to="/" />;
+  }
+  
   return (
     <div>
-      <h2>Welcome to the Admin Dashboard!</h2>
-      <h3>Booked Slots</h3>
-      {bookedSlots && bookedSlots.length > 0 ? (
-        bookedSlots.map((booking) => (
-          <div key={booking.id}>
-            <p>Slot ID: {booking.slotId}</p>
-            <p>Status: {booking.status}</p>
-            {/* Add a dropdown or buttons to update the status */}
-            <select
-              value={booking.status}
-              onChange={(e) => updateSlotStatus(booking.id, e.target.value)}
-            >
-              <option value="Booked">Booked</option>
-              <option value="Available">Available</option>
-              {/* Add more options as needed */}
-            </select>
-          </div>
-        ))
-      ) : (
-        <p>No booked slots available.</p>
+      <h2>Admin Page</h2>
+      {paymentDetails && (
+        <div>
+          <p>Barber Name: {paymentDetails.barberName}</p>
+          <p>Time: {paymentDetails.time}</p>
+          <p>User Name: {paymentDetails.name}</p>
+          <p>Phone Number: {paymentDetails.phoneNumber}</p>
+          {/* Other admin page content... */}
+        </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default AdminDashboard;
+export default AdminDashboard
